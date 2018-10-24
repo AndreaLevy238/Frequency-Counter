@@ -10,7 +10,7 @@
 *                Frequency detected is transmitted over SPI to
 *                the IOIO subsystem.
 *
-* Hardware     : 1. ATMEL ATmega328P Microcontroller
+* Hardware     : 1. ATMEL ATmega328P Micro controller
 *                2. Sparkfun IOIO V.2 Breakout Board
 *
 * Created      : 4/20/2018
@@ -40,8 +40,7 @@ volatile int samp_dur_status = 0;   // Sampling Duration Status
 
 int main(void)
 {
-	double frequency = 0;
-	static char freq_print[16];
+	uint8_t hasData = 0;
 	initTimer0();
 	initTimer1();
 	initTimer2();
@@ -49,7 +48,7 @@ int main(void)
 	
 
 	DDRC |= 1<<PC1;                 // Pin B5 output
-	DDRC |= 1<<PC0;                 // Pin B0 outputt 
+	DDRC |= 1<<PC0;                 // Pin B0 output 
 	sei();                          // Enable global interrupts
 
 	while(1)
@@ -65,7 +64,16 @@ int main(void)
 		TIFR1 = 0x2;     // Reset Frequency Counter
 		TIFR2 = 0x2;     // Reset Sampling Duration Timer
 		/*-----------------------------------------------------------------------*/
+		
+		/*------------------- Block for Data Request ---------------------------*/
 		_delay_us(10);
+		hasData = usart_istheredata();
+		while(!hasData){
+			_delay_us(100);
+			hasData = usart_istheredata();	
+		}
+		/*---------------------------------------------------------------------*/
+		
 		/*--------------------------- Begin Measurement -------------------------*/
 
 		TCCR0B = 0x03;          // Start Sampling Rate Timer: SysCLK/64
@@ -87,16 +95,17 @@ int main(void)
 		samp_dur_status = 0;           // Unset sampling duration status
 		fs_timer_status = 0;           // Unset sampling period status
 		
-		frequency = (double)FC * 8 / 499;      // Counts * Prescaler / time(uS)
-		dtostrf(frequency, 7, 6, freq_print);  // Converts freq into ASCII str.
 		_delay_ms(1);
-		serial_print_freq(freq_print, FC_L, FC_H); // Print Data to Terminal
+		serial_print(FC_L, FC_H); // Print Data to Terminal
+		FC_L  = 0;
+		FC_H = 0;
 	}
 	/*---------------------------- End Measurement ------------------------------*/
 
 	return 0;
 
 } // end main
+
 
 void initTimer0(void)
 {

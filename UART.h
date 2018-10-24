@@ -27,10 +27,7 @@ void usart_init(uint32_t baudin, uint32_t clk_speedin);
 void usart_send( uint8_t data );
 uint8_t  usart_recv(void);
 uint8_t  usart_istheredata(void);
-void serial_print(char serial_phrase[]);
-void serial_print_num(uint8_t data);
-void serial_print_nl(char serial_phrase[]);
-void serial_print_freq(char freq_print[], uint8_t FC_L, uint8_t FC_H);
+void serial_print(uint8_t low, uint8_t high);
 
 
 

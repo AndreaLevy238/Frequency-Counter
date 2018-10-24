@@ -38,7 +38,7 @@ void usart_send( uint8_t data )
 
 /* the receive data function. Note that this a blocking call
 Therefore you may not get control back after this is called 
-until a much later time. It may be helpfull to use the 
+until a much later time. It may be helpful to use the 
 istheredata() function to check before calling this function
 	@return 8bit data packet from sender
 */
@@ -57,68 +57,8 @@ uint8_t  usart_istheredata(void)
 {
 	 return (UCSR0A & (1<<RXC0));
 }
-void serial_print(char serial_phrase[])
-{
-	int char_cnt = strlen(serial_phrase);
-	int i;
-	for(i=0; i<char_cnt+1; i++)
-	{
-		usart_send(serial_phrase[i]);
-	}
-}
-void serial_print_num(uint8_t data)
-{
-	uint8_t temp0 = 0;
-	int temp1 = 0;
-	int j=0, k=0;
-	//           Begin with:  76543210
-	temp0 = data & ~(0xF0); //00003210
-	temp1 = data;           //76540000
-	temp1 = temp1 >> 4; 	  //00007654
-	
-	temp0 = (temp0 + 48);   // Convert to ASCII
-	temp1 = (temp1 + 48);   // Convert to ASCII
-	
-	char i[6] = "ABCDEF";   // Decimal to Hex Conversion on lower nibble
-	for(j=0; j<7; j++){
-		if(temp0 == 58 + j){
-			temp0 = i[j];
-		}
-	}
-	
-	for(k=0; k<7; k++){ 	// Decimal to Hex Conversion on upper nibble
-		if(temp1 == 58 + k){
-			temp1 = i[k];
-		}
-	}
-	usart_send(temp1);  	// Send upper character to serial terminal
-	usart_send(temp0);  	// Send lower character to serial terminal
-	// Result: (upper nibble) (lower nibble) - Hex
-}
-void serial_print_nl(char serial_phrase[])
-{
-	int char_cnt = strlen(serial_phrase); // Count number of letters in string
-	int i;
-	for(i=0; i<char_cnt+1; i++)
-	{
-		usart_send(serial_phrase[i]);
-	}
-	usart_send('\n'); // New line
-	usart_send('\r'); // Carriage Return
-}
 
-void serial_print_freq(char freq_str[], uint8_t FC_L, uint8_t FC_H)
-{
-		serial_print("Freq. Measured: ");
-		serial_print(freq_str);
-		serial_print_nl("MHz");
-		
-		serial_print("TCNT1: ");
-		serial_print_num(FC_L);
-		serial_print_num(FC_H);  // Send Lower bit of freq cnt
-		usart_send('\n'); // New line
-		usart_send('\r'); // Carriage Return
-
-		_delay_ms(50);
-		usart_send(12);
+void serial_print(uint8_t low, uint8_t high) {
+	usart_send(low);
+	usart_send(high);
 }
